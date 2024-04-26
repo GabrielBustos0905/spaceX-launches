@@ -1,0 +1,57 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { getLaunchById } from "../../services/spacex"
+
+export const prerender = false
+
+const { id } = Astro.params
+let launch
+
+if(id) {
+    launch = await getLaunchById({ id })
+} else Astro.redirect("/")
+
+const launchStatus = launch?.success ? "Success" : "Failure"
+---
+
+<Layout title={`Lanzamiento ${launch?.name}`}>
+    <article class="rounded-lg border shadow-md bg-gray-800 border-gray-700 flex gap-20 justify-center p-4">
+        <img src={launch?.links.patch.small} alt="">
+        <div class="w-3/5 h-auto flex flex-col gap-2">
+            <div class="w-full h-auto flex gap-8 justify-center items-center mb-4">
+                <h1 class="py-4 text-4xl tracking-tight text-white">{launch?.name}</h1>
+                <span class={`text-lg font-semibold mr-2 px-2.5 py-0.5 rounded ${launch?.success ? "bg-green-200 text-green-900" : "bg-red-200 text-red-900"}`}>
+                    {launchStatus}
+                </span>
+            </div>
+            <p>Date: <span class="font-light text-gray-400 ml-2">{launch?.date_utc}</span></p>
+            <p>Detail: <span class="font-light text-gray-400 ml-2">{launch?.details}</span></p>
+            {
+                launch?.success === false ? launch?.failures.map(failure => (
+                    <p>Failure: <span class="font-light text-gray-400 ml-2">{failure.reason}</span></p>
+                )) : <p></p>
+            }
+            <div class="flex gap-2 items-center">
+                <p>More info:</p>
+                <a href={launch?.links.wikipedia} title="Wikipedia">
+                    <svg class="hover:scale-110 transition-all" width="40" height="40" viewBox="0 0 24 24" stroke-width="1.5" stroke="#597e8d" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 4.984h2" />
+                        <path d="M8 4.984h2.5" />
+                        <path d="M14.5 4.984h2.5" />
+                        <path d="M22 4.984h-2" />
+                        <path d="M4 4.984l5.455 14.516l6.545 -14.516" />
+                        <path d="M9 4.984l6 14.516l6 -14.516" />
+                    </svg>
+                </a>
+                <a href={launch?.links.webcast} title="Youtube">
+                    <svg class="hover:scale-110 transition-all" width="40" height="40" viewBox="0 0 24 24" stroke-width="1.5" stroke="#597e8d" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M2 8a4 4 0 0 1 4 -4h12a4 4 0 0 1 4 4v8a4 4 0 0 1 -4 4h-12a4 4 0 0 1 -4 -4v-8z" />
+                        <path d="M10 9l5 3l-5 3z" />
+                      </svg>
+                </a>
+            </div>
+        </div>
+    </article>
+</Layout>
